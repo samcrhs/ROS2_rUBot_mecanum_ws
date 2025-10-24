@@ -74,6 +74,7 @@ Then you proceed with:
     cd ~/ROS2_rUBot_mecanum_ws/web
     python3 -m http.server 8000
     ````
+    > When using TheConstruc environment, port has to be 7000
     This starts a simple HTTP server on port 8000.  
 - When you open the web Dashboard in the same computer, from new terminal:
     - in VPN virtual environment (TheConstruct's ROS2 virtual environment), type `webpage_address` and later `rosbridge_address`
