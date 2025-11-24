@@ -62,6 +62,7 @@ To proceed with the signal identification we first bringup the robot and navigat
         ````shell
         ros2 launch my_robot_navigation2 navigation2_robot.launch.py use_sim_time:=false map_file:=map_square4m_sign.yaml params_file:=limo_real.yaml
         ````
+        > Be sure the Odometry message is zero when starting the navigation.
 
 ## **3. Signal prediction**
 
