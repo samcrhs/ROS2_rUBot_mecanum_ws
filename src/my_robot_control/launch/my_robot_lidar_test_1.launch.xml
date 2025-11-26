@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<launch>
+ <!-- LIDAR Test -->
+  <node pkg="my_robot_control" exec="my_robot_lidar_test_1_exec" name="lidar_test_node_stop" output="screen">
+  </node> 
+</launch>
