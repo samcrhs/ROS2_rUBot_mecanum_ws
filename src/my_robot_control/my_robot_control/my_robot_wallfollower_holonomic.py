@@ -106,6 +106,7 @@ class WallFollower(Node):
         FR_RIGHT    = []
         RIGHT       = []
         BACK_RIGHT  = []
+        BACK = []
 
         for i, d in enumerate(scan.ranges):
             if not math.isfinite(d):
@@ -123,86 +124,83 @@ class WallFollower(Node):
                 RIGHT.append(d)
             elif -160 <= ang < -110:
                 BACK_RIGHT.append(d)
+            elif ang < -160 or ang > 160:
+                BACK.append(d)
 
         # Minimal distances
         min_front      = min(FRONT)      if FRONT      else float('inf')
         min_fr_right   = min(FR_RIGHT)   if FR_RIGHT   else float('inf')
         min_right      = min(RIGHT)      if RIGHT      else float('inf')
         min_back_right = min(BACK_RIGHT) if BACK_RIGHT else float('inf')
+        min_back       = min(BACK)       if BACK       else float('inf')
 
         twist = Twist()
         action = ""
 
-        #----------------------------------------------------------
-        # RULE 1: FRONT obstacle → turn left
+                #----------------------------------------------------------
+        # RULE 1: FRONT obstacle → move LEFT (holonomic)
         #----------------------------------------------------------
         if min_front < self.base_distance:
             twist.linear.x = 0.0
-            twist.linear.y = 0.0
-            twist.angular.z = self.v_ang * 2.0
-            action = f"FRONT {min_front:.2f} m → turn LEFT"
+            twist.linear.y = +self.v_lin     # MOVE LEFT
+            twist.angular.z = 0.0
+            action = f"FRONT {min_front:.2f} m → move LEFT"
 
         #----------------------------------------------------------
-        # RULE 2: FRONT-RIGHT obstacle → slow + left
+        # RULE 2: FRONT-RIGHT obstacle → move FRONT-LEFT
         #----------------------------------------------------------
         elif min_fr_right < self.base_distance:
-            twist.linear.x = 0.0
-            twist.linear.y = 0.0
-            twist.angular.z = self.v_ang * 2.0
-            action = f"FRONT-RIGHT {min_fr_right:.2f} m → turn LEFT"
+            twist.linear.x = +self.v_lin     # ADVANCE
+            twist.linear.y = +self.v_lin     # MOVE LEFT
+            twist.angular.z = 0.0
+            action = f"FRONT-RIGHT {min_fr_right:.2f} m → move FRONT-LEFT"
 
         #----------------------------------------------------------
-        # RULE 3: RIGHT visible → control with tolerance band (no vy)
+        # RULE 3: RIGHT visible → holonomic tracking + rotation
         #----------------------------------------------------------
         elif math.isfinite(min_right):
-            # error > 0 → too far; error < 0 → too close
             error = min_right - self.base_distance
 
-            if abs(error) <= self.tol:
-                # Inside band: go straight
-                twist.linear.x = self.v_lin
-                twist.linear.y = 0.0
-                twist.angular.z = 0.0
-                action = (
-                    f"RIGHT ~OK ({min_right:.2f} m, target "
-                    f"{self.base_distance:.2f}±{self.tol:.2f}) → STRAIGHT"
-                )
+            twist.linear.x = self.v_lin      # BASE FORWARD
+            twist.linear.y = -1.5 * error    # LATERAL CORRECTION (push left/right)
+            twist.angular.z = -1.2 * error   # SMALL ROTATION correction
 
-            elif error < 0:
-                # Too close to right wall → slow forward + stronger left turn
-                twist.linear.x = self.v_lin * 0.5
-                twist.linear.y = 0.0
-                twist.angular.z = self.v_ang * 2.0
-                action = (
-                    f"RIGHT too CLOSE ({min_right:.2f} m < "
-                    f"{self.base_distance:.2f}-{self.tol:.2f}) → "
-                    f"forward + strong LEFT turn"
-                )
-
-            else:
-                # Too far from right wall → slow forward + stronger right turn
-                twist.linear.x = self.v_lin * 0.5
-                twist.linear.y = 0.0
-                twist.angular.z = -self.v_ang * 2.0
-                action = (
-                    f"RIGHT too FAR ({min_right:.2f} m > "
-                    f"{self.base_distance:.2f}+{self.tol:.2f}) → "
-                    f"forward + strong RIGHT turn"
-                )
+            action = (
+                f"RIGHT tracking ({min_right:.2f} m, target "
+                f"{self.base_distance:.2f}) → lateral adjust + rotation"
+            )
 
         #----------------------------------------------------------
-        # RULE 4: BACK-RIGHT → only if it is the most relevant wall
+        # RULE 4: BACK-RIGHT → move FRONT-RIGHT
         #----------------------------------------------------------
         elif math.isfinite(min_back_right) and (
             not math.isfinite(min_right) or min_back_right <= min_right
         ):
-            twist.linear.x = self.v_lin * 0.1
-            twist.linear.y = 0.0
-            twist.angular.z = -2.0 * self.v_ang
+            twist.linear.x = +self.v_lin     # FORWARD
+            twist.linear.y = -self.v_lin     # MOVE RIGHT
+            twist.angular.z = 0.0
+
             action = (
-                f"BACK-RIGHT {min_back_right:.2f} m → "
-                f"very slow + STRONG RIGHT turn (2*w)"
+                f"BACK-RIGHT {min_back_right:.2f} m → move FRONT-RIGHT"
             )
+
+        #----------------------------------------------------------
+        # RULE 5: BACK obstacle → move RIGHT
+        #----------------------------------------------------------
+        elif min_back < self.base_distance:
+            twist.linear.x = 0.0
+            twist.linear.y = -self.v_lin     # MOVE RIGHT
+            twist.angular.z = 0.0
+            action = f"BACK {min_back:.2f} m → move RIGHT"
+
+        #----------------------------------------------------------
+        # RULE 6: CLEAR → move FORWARD
+        #----------------------------------------------------------
+        else:
+            twist.linear.x = self.v_lin
+            twist.linear.y = 0.0
+            twist.angular.z = 0.0
+            action = "Clear → move FORWARD"
 
         # if nothing is visible, twist remains zero -> robot stops
 
