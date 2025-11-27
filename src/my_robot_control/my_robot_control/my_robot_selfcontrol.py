@@ -12,9 +12,9 @@ class RobotSelfControl(Node):
 
         # Configurable parameters
         self.declare_parameter('distance_limit', 0.3)
-        self.declare_parameter('speed_factor', 1.0)
+        self.declare_parameter('speed_factor', 0.1)
         self.declare_parameter('forward_speed', 0.2)
-        self.declare_parameter('rotation_speed', 0.3)
+        self.declare_parameter('rotation_speed', 0.2)
         self.declare_parameter('time_to_stop', 5.0)
 
         self._distanceLimit = self.get_parameter('distance_limit').value

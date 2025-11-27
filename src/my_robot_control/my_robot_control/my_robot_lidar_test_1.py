@@ -7,7 +7,7 @@ from geometry_msgs.msg import Twist
 class LidarTest(Node):
 
     def __init__(self):
-        super().__init__('lidar_test_node_stop')
+        super().__init__('lidar_test_node')
 
         self.subscription = self.create_subscription(
             LaserScan,
@@ -76,7 +76,7 @@ class LidarTest(Node):
         if closest_distance < 0.40:
             self.get_logger().warn("Obstacle too close! Stopping robot.")
             stop = Twist()   # Twist buit = tot a zero = stop
-            self.cmd_pub.publish(stop)
+            self.publisher.publish(stop)
 
 
 def main(args=None):

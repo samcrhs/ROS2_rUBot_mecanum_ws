@@ -115,38 +115,38 @@ class RobotSelfControl(Node):
         # angular.z is kept zero; lateral motion is done through linear.y
         # Convention: linear.y > 0 -> left, linear.y < 0 -> right (ROS standard)
         # Default: keep moving forward
-        default_forward = self._forwardSpeed * self._speedFactor
-        default_lateral = 0.0
+        #default_forward = self._forwardSpeed * self._speedFactor
+        #default_lateral = 0.0
 
         if closest_distance < self._distanceLimit:
             if zone == "FRONT":
                 # obstacle ahead -> back up
-                self._msg.linear.x = -default_forward
+                self._msg.linear.x = -self._forwardSpeed
                 self._msg.linear.y = 0.0
-                self._msg.angular.z = 0.0
+                self._msg.angular.z = self._rotationSpeed
             elif zone == "LEFT":
                 # obstacle to left -> strafe right while keeping some forward/back motion if desired
-                self._msg.linear.x = default_forward  # keep moving forward a bit
-                self._msg.linear.y = -self._rotationSpeed * self._speedFactor  # strafe right
-                self._msg.angular.z = 0.0
+                self._msg.linear.x = self._forwardSpeed  # keep moving forward a bit
+                self._msg.linear.y = -self._forwardSpeed  # strafe right
+                self._msg.angular.z = -self._rotationSpeed
             elif zone == "RIGHT":
                 # obstacle to right -> strafe left
-                self._msg.linear.x = default_forward
-                self._msg.linear.y = self._rotationSpeed * self._speedFactor  # strafe left
-                self._msg.angular.z = 0.0
+                self._msg.linear.x = self._forwardSpeed
+                self._msg.linear.y = self._forwardSpeed  # strafe left
+                self._msg.angular.z = self._rotationSpeed
             elif zone in ["BACK_LEFT", "BACK_RIGHT"]:
                 # obstacle behind -> move forward
-                self._msg.linear.x = default_forward
+                self._msg.linear.x = self._forwardSpeed
                 self._msg.linear.y = 0.0
                 self._msg.angular.z = 0.0
             else:
                 # fallback: keep moving forward
-                self._msg.linear.x = default_forward
+                self._msg.linear.x = self._forwardSpeed
                 self._msg.linear.y = 0.0
                 self._msg.angular.z = 0.0
         else:
             # no close obstacle: normal forward motion, no lateral, no rotation
-            self._msg.linear.x = default_forward
+            self._msg.linear.x = self._forwardSpeed
             self._msg.linear.y = 0.0
             self._msg.angular.z = 0.0
 
