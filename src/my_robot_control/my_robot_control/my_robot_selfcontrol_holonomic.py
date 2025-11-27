@@ -128,12 +128,12 @@ class RobotSelfControl(Node):
                 # obstacle to left -> strafe right while keeping some forward/back motion if desired
                 self._msg.linear.x = self._forwardSpeed  # keep moving forward a bit
                 self._msg.linear.y = -self._forwardSpeed  # strafe right
-                self._msg.angular.z = -self._rotationSpeed
+                self._msg.angular.z = 0.0
             elif zone == "RIGHT":
                 # obstacle to right -> strafe left
                 self._msg.linear.x = self._forwardSpeed
                 self._msg.linear.y = self._forwardSpeed  # strafe left
-                self._msg.angular.z = self._rotationSpeed
+                self._msg.angular.z = 0.0
             elif zone in ["BACK_LEFT", "BACK_RIGHT"]:
                 # obstacle behind -> move forward
                 self._msg.linear.x = self._forwardSpeed
