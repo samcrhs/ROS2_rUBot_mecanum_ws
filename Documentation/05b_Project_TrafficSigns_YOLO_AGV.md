@@ -131,3 +131,8 @@ Consider:
     ````shell
     ros2 launch my_robot_ai_identification rubot_navigation_yolo.launch.py
     ````
+
+- For the new strategy, use:
+    ````shell
+    ros2 launch my_robot_ai_identification rubot_navigation_wp_yolo.launch.py
+    ````
