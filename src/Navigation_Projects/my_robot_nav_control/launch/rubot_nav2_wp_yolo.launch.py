@@ -13,7 +13,7 @@ def generate_launch_description():
     nav_node = Node(
         package='my_robot_nav_control',     # <-- posa el teu paquet real
         executable='rubot_nav2_wp_yolo_exec',        # <-- nom del console_script al setup.py
-        name='nav_waypoints_node',                # <-- igual que el node i el YAML
+        name='custom_nav2',                # <-- igual que el node i el YAML
         output='screen',
         parameters=[params_file]
     )

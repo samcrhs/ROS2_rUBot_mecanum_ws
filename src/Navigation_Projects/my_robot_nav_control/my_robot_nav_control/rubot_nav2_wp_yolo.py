@@ -9,7 +9,7 @@ import tf_transformations
 
 class NavigationTask(Node):
     def __init__(self):
-        super().__init__('nav_waypoints_node')
+        super().__init__('custon_nav2')
 
         # --- Nav2 Simple Commander ---
         self.navigator = BasicNavigator()

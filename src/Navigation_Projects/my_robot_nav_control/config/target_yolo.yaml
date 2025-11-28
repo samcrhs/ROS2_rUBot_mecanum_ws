@@ -1,4 +1,4 @@
-nav_waypoints_node:
+custom_nav2:
   ros__parameters:
 
     # Initial pose [x, y, yaw] in "map" frame
