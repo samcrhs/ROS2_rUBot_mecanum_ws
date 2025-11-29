@@ -108,6 +108,10 @@ class WallFollower(Node):
         BACK_RIGHT  = []
         BACK = []
 
+        FR_LEFT     = []
+        LEFT        = []
+        BACK_LEFT   = []
+
         for i, d in enumerate(scan.ranges):
             if not math.isfinite(d):
                 continue
@@ -127,6 +131,13 @@ class WallFollower(Node):
             elif ang < -160 or ang > 160:
                 BACK.append(d)
 
+            elif 20 < ang <= 70:
+                FR_LEFT.append(d)
+            elif 70 < ang <= 110:
+                LEFT.append(d)
+            elif 110 < ang <= 160:
+                BACK_LEFT.append(d)
+
         # Minimal distances
         min_front      = min(FRONT)      if FRONT      else float('inf')
         min_fr_right   = min(FR_RIGHT)   if FR_RIGHT   else float('inf')
@@ -134,18 +145,19 @@ class WallFollower(Node):
         min_back_right = min(BACK_RIGHT) if BACK_RIGHT else float('inf')
         min_back       = min(BACK)       if BACK       else float('inf')
 
+        min_fr_left    = min(FR_LEFT)    if FR_LEFT    else float('inf')
+        min_left       = min(LEFT)       if LEFT       else float('inf')
+        min_bl         = min(BACK_LEFT)  if BACK_LEFT  else float('inf')
+
         twist = Twist()
         action = ""
 
-                #----------------------------------------------------------
-        # RULE 1: FRONT obstacle → move LEFT (holonomic)
-        #----------------------------------------------------------
+         # RULE 1: FRONT obstacle → BACK + slight rotation
         if min_front < self.base_distance:
-            twist.linear.x = 0.0
-            twist.linear.y = +self.v_lin     # MOVE LEFT
-            twist.angular.z = 0.0
-            action = f"FRONT {min_front:.2f} m → move LEFT"
-
+            twist.linear.x = -self.v_lin         # marxa enrere
+            twist.linear.y = 0.0                 # sense lateral
+            twist.angular.z = self.v_ang         # gira lleugerament
+            action = f"FRONT {min_front:.2f} m → BACK + rotate"
         #----------------------------------------------------------
         # RULE 2: FRONT-RIGHT obstacle → move FRONT-LEFT
         #----------------------------------------------------------
@@ -155,6 +167,14 @@ class WallFollower(Node):
             twist.angular.z = 0.0
             action = f"FRONT-RIGHT {min_fr_right:.2f} m → move FRONT-LEFT"
 
+        #----------------------------------------------------------
+        # RULE 2b: FRONT-LEFT obstacle → move FRONT-RIGHT
+        #----------------------------------------------------------
+        elif min_fr_left < self.base_distance:
+            twist.linear.x = +self.v_lin      # FORWARD
+            twist.linear.y = -self.v_lin      # MOVE RIGHT (diagonal)
+            twist.angular.z = 0.0
+            action = f"FRONT-LEFT {min_fr_left:.2f} m → move FRONT-RIGHT"
         #----------------------------------------------------------
         # RULE 3: RIGHT visible → holonomic tracking + rotation
         #----------------------------------------------------------
@@ -171,6 +191,20 @@ class WallFollower(Node):
             )
 
         #----------------------------------------------------------
+        # RULE 3b: LEFT visible → holonomic tracking + rotation
+        #----------------------------------------------------------
+        elif math.isfinite(min_left):
+            error = min_left - self.base_distance
+
+            twist.linear.x = self.v_lin        # BASE FORWARD
+            twist.linear.y = +1.5 * error      # LATERAL CORRECTION (push right/left)
+            twist.angular.z = +1.2 * error     # SMALL ROTATION correction
+
+            action = (
+                f"LEFT tracking ({min_left:.2f} m, target "
+                f"{self.base_distance:.2f}) → lateral adjust + rotation"
+            )
+        #----------------------------------------------------------
         # RULE 4: BACK-RIGHT → move FRONT-RIGHT
         #----------------------------------------------------------
         elif math.isfinite(min_back_right) and (
@@ -184,6 +218,19 @@ class WallFollower(Node):
                 f"BACK-RIGHT {min_back_right:.2f} m → move FRONT-RIGHT"
             )
 
+        #----------------------------------------------------------
+        # RULE 4b: BACK-LEFT → move FRONT-LEFT
+        #----------------------------------------------------------
+        elif math.isfinite(min_bl) and (
+            not math.isfinite(min_left) or min_bl <= min_left
+        ):
+            twist.linear.x = +self.v_lin       # FORWARD
+            twist.linear.y = +self.v_lin       # MOVE LEFT
+            twist.angular.z = 0.0
+
+            action = (
+                f"BACK-LEFT {min_bl:.2f} m → move FRONT-LEFT"
+            )
         #----------------------------------------------------------
         # RULE 5: BACK obstacle → move RIGHT
         #----------------------------------------------------------
