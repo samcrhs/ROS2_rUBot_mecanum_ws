@@ -151,13 +151,15 @@ class WallFollower(Node):
 
         twist = Twist()
         action = ""
-
-         # RULE 1: FRONT obstacle → BACK + slight rotation
+        #----------------------------------------------------------
+        # RULE 1: FRONT obstacle → BACK + rotate
+        #----------------------------------------------------------
         if min_front < self.base_distance:
             twist.linear.x = -self.v_lin         # marxa enrere
             twist.linear.y = 0.0                 # sense lateral
             twist.angular.z = self.v_ang         # gira lleugerament
             action = f"FRONT {min_front:.2f} m → BACK + rotate"
+
         #----------------------------------------------------------
         # RULE 2: FRONT-RIGHT obstacle → move FRONT-LEFT
         #----------------------------------------------------------
@@ -198,7 +200,7 @@ class WallFollower(Node):
 
             twist.linear.x = self.v_lin        # BASE FORWARD
             twist.linear.y = +1.5 * error      # LATERAL CORRECTION (push right/left)
-            twist.angular.z = +1.2 * error     # SMALL ROTATION correction
+            twist.angular.z = +1.2 * error   # SMALL ROTATION correction
 
             action = (
                 f"LEFT tracking ({min_left:.2f} m, target "
