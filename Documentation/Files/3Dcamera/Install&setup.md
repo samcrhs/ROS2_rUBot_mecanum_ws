@@ -4,15 +4,15 @@ This camera could be installed on:
 - PC Ubuntu 22 with ROS2 Humble
 - Raspberrypi4 Ubuntu 22 with ROS2 Humble
 
-The installation process is the same in both cases.
+The installation process in **PC Ubuntu 22**:
 
-Proceed with:
 ```bash
 sudo apt install -y git cmake build-essential \
   libssl-dev libusb-1.0-0-dev libudev-dev pkg-config \
-  libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev
+  libgtk-3-dev libglfw3-dev libgl1-mesa-dev libglu1-mesa-dev \
+  librealsense2-dkms librealsense2-utils
 
-mkdir -p ~/repos && cd ~/repos
+mkdir -p ~/software && cd ~/software
 git clone https://github.com/IntelRealSense/librealsense.git
 cd librealsense
 sudo ./scripts/setup_udev_rules.sh
@@ -26,23 +26,31 @@ realsense-viewer
 To install the wrapper ROS2:
 ```bash
 sudo apt install ros-humble-realsense2-camera ros-humble-realsense2-description
-# Launch with default params values
-ros2 launch realsense2_camera rs_launch.py
-# Llançament amb resolució més baixa per anar més fi
+````
+The launch file with default parameters:
+```bash
 ros2 launch realsense2_camera rs_launch.py \
   rgb_camera.color_profile:=640x480x15 \
   depth_module.depth_profile:=640x360x15 \
   pointcloud.enable:=false
-rviz2
 ```
-When camera is on raspberrypi is recommeded:
+When camera is on **raspberrypi** you have to add a patch to it kernel:
+````bash
+cd ~/software/librealsense
+sudo ./scripts/setup_udev_rules.sh
+sudo ./scripts/patch-realsense-ubuntu-lts-hwe.sh
+````
+The launch file with custom parameters:
 ```bash
 ros2 launch realsense2_camera rs_launch.py \
+  initial_reset:=true \
+  enable_color:=true \
+  enable_sync:=false \
+  pointcloud.enable:=false \
   depth_module.depth_profile:=640x360x15 \
   rgb_camera.color_profile:=640x480x15 \
-  pointcloud.enable:=false \
-  enable_gyro:=false \
-  enable_accel:=false
+  enable_infra1:=false enable_infra2:=false \
+  align_depth:=false
 ```
 
 # Install Orbbec DaBai
