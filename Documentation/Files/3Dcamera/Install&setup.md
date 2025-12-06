@@ -23,6 +23,9 @@ sudo make install
 
 realsense-viewer
 ```
+Here is interesting to change to a more stable firmware version for D435/i:
+5.12.15.50. This can be done in the "Device" tab -> "Update Firmware".
+
 To install the wrapper ROS2:
 ```bash
 sudo apt install ros-humble-realsense2-camera ros-humble-realsense2-description
@@ -34,24 +37,39 @@ ros2 launch realsense2_camera rs_launch.py \
   depth_module.depth_profile:=640x360x15 \
   pointcloud.enable:=false
 ```
-When camera is on **raspberrypi** you have to add a patch to it kernel:
-````bash
-cd ~/software/librealsense
-sudo ./scripts/setup_udev_rules.sh
-sudo ./scripts/patch-realsense-ubuntu-lts-hwe.sh
-````
-The launch file with custom parameters:
-```bash
-ros2 launch realsense2_camera rs_launch.py \
-  initial_reset:=true \
-  enable_color:=true \
-  enable_sync:=false \
-  pointcloud.enable:=false \
-  depth_module.depth_profile:=640x360x15 \
-  rgb_camera.color_profile:=640x480x15 \
-  enable_infra1:=false enable_infra2:=false \
-  align_depth:=false
-```
+When camera is on **raspberrypi** you have to:
+- add a patch to it kernel:
+  ````bash
+  cd ~/software/librealsense
+  sudo ./scripts/setup_udev_rules.sh
+  sudo ./scripts/patch-realsense-ubuntu-lts-hwe.sh
+  ````
+- Increase the ùsbfs_memory` to 512:
+  - open the file:
+    ```bash
+    sudo nano /boot/firmware/cmdline.txt
+    ````
+  - add at the end of line:
+    ````bash
+    usbcore.usbfs_memory_mb=512
+    ````
+  - reboot the raspberrypi
+- change to a more stable firmware version for D435/i:
+5.12.15.50.
+
+- Use the launch file with custom parameters:
+  ```bash
+  ros2 launch realsense2_camera rs_launch.py \
+    initial_reset:=true \
+    enable_color:=true \
+    enable_depth:=true \
+    align_depth:=true \
+    enable_sync:=false \
+    pointcloud.enable:=false \
+    depth_module.depth_profile:=640x360x15 \
+    rgb_camera.color_profile:=640x480x30 \
+    enable_infra1:=false enable_infra2:=false
+  ```
 
 # Install Orbbec DaBai
 
