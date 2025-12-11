@@ -184,7 +184,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         enabled: True #Afegit
-        inflation_radius: 0.4 #1.0
+        inflation_radius: 0.2 #1.0
         cost_scaling_factor: 3.0
       obstacle_layer:
         plugin: "nav2_costmap_2d::ObstacleLayer"
