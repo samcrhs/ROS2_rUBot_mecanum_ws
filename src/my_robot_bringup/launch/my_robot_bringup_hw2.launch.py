@@ -60,7 +60,6 @@ def generate_launch_description():
 
     # ================================================================
     # Robot description (URDF/XACRO) + robot_state_publisher
-    # (sense use_sim_time: per defecte farà servir rellotge real)
     # ================================================================
     robot_description_content = Command([
         'xacro ',
@@ -78,7 +77,6 @@ def generate_launch_description():
         output='screen',
         parameters=[
             {'robot_description': robot_description_content},
-            # No cal ni posar use_sim_time: per defecte és False
         ]
     )
 
@@ -142,7 +140,7 @@ def generate_launch_description():
 
     ld.add_action(robot_state_publisher_node)
     ld.add_action(robot_driver_hw_launch)
-    ld.add_action(rplidar_hw_launch)
     ld.add_action(usb_cam_hw_launch)
+    ld.add_action(rplidar_hw_launch)
 
     return ld
