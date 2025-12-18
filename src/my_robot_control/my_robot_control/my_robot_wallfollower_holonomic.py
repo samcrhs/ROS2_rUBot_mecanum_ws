@@ -161,18 +161,6 @@ class WallFollower(Node):
             twist.angular.z = self.v_ang         # gira lleugerament
             action = f"FRONT {min_front:.2f} m → LEFT + rotate"
 
-            if min_left<min_front:
-                twist.linear.x = -self.v_lin         # marxa enrere
-                twist.linear.y = 0.0                # sense lateral
-                twist.angular.z = self.v_ang         # gira lleugerament
-                action = f"FRONT {min_front:.2f} m → BACK + rotate"
-            
-            if min_fr_left<min_front:
-                twist.linear.x = -self.v_lin         # marxa enrere
-                twist.linear.y = 0.0                # sense lateral
-                twist.angular.z = self.v_ang         # gira lleugerament
-                action = f"FRONT {min_front:.2f} m → BACK + rotate"
-
 
         #----------------------------------------------------------
         # RULE 2: FRONT-RIGHT obstacle → move FRONT-LEFT
@@ -187,9 +175,9 @@ class WallFollower(Node):
         # RULE 2b: FRONT-LEFT obstacle → move FRONT-RIGHT
         #----------------------------------------------------------
         elif min_fr_left < self.base_distance:
-            twist.linear.x = +self.v_lin      # FORWARD
-            twist.linear.y = -self.v_lin      # MOVE RIGHT (diagonal)
-            twist.angular.z = 0.0
+            twist.linear.x = 0.0      # FORWARD
+            twist.linear.y = 0.0    # MOVE RIGHT (diagonal)
+            twist.angular.z = self.v_ang 
             action = f"FRONT-LEFT {min_fr_left:.2f} m → move FRONT-RIGHT"
         #----------------------------------------------------------
         # RULE 3: RIGHT visible → holonomic tracking + rotation
@@ -227,7 +215,7 @@ class WallFollower(Node):
             not math.isfinite(min_right) or min_back_right <= min_right
         ):
             twist.linear.x = +self.v_lin     # FORWARD
-            twist.linear.y = -self.v_lin     # MOVE RIGHT
+            twist.linear.y = 0.0    # MOVE RIGHT
             twist.angular.z = 0.0
 
             action = (
@@ -241,7 +229,7 @@ class WallFollower(Node):
             not math.isfinite(min_left) or min_bl <= min_left
         ):
             twist.linear.x = +self.v_lin       # FORWARD
-            twist.linear.y = +self.v_lin       # MOVE LEFT
+            twist.linear.y = 0.0      # MOVE LEFT
             twist.angular.z = 0.0
 
             action = (
